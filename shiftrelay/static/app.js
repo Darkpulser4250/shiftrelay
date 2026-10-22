@@ -17,7 +17,23 @@ async function refresh() {
     'Block rules: ' + data.policy.block_rules.length, 'Owned HLS: ' + (data.policy.owned_hls_hosts.join(', ') || '(none)')].join('\n');
   $('fingerprint').textContent = 'PUBLIC CA / SHA-256\n' + data.ca_sha256;
   $('message').textContent = 'Connected. Policy mode: ' + data.policy.mode + '. No live platform support has been validated.';
+  const nativeResponse = await fetch('/v1/native-status', { headers: { Authorization: 'Bearer ' + key }, cache: 'no-store', signal: AbortSignal.timeout(3000) });
+  if (!nativeResponse.ok) throw Error('Native adapter status unavailable.');
+  const native = (await nativeResponse.json()).youtube_tv;
+  if (current !== generation || !key) return;
+  $('nativeTitle').textContent = !native ? 'Bridge not started.' : native.stale ? 'Bridge status is stale.' : native.connected ? 'TV app connected · ' + native.mode : 'Waiting for a TV app.';
+  $('nativeStatus').textContent = !native ? 'Enable the optional youtube-tv Compose profile and pair from your terminal.' : [
+    'Mode: ' + native.mode + ' / ' + native.reason,
+    'Ad signal: ' + (native.ad_active === null ? 'unknown' : native.ad_active ? 'present' : 'clear'),
+    'Volume recovery pending: ' + native.pending_restore,
+    'Ad signals this connection: ' + native.counters.ad_breaks,
+    'Volume-zero requests: ' + native.counters.lower_requests,
+    'Restore requests: ' + native.counters.restore_requests,
+    'Native Skip requests: ' + native.counters.skip_requests,
+    'Command failures: ' + native.counters.command_failures,
+    'Requests are not proof that an ad was removed.'
+  ].join('\n');
 }
 $('connect').addEventListener('click', async () => { generation++; key = $('key').value.trim(); $('key').value = ''; try { await refresh(); } catch(e) { key = ''; $('message').textContent = e.message; } });
-$('disconnect').addEventListener('click', () => { generation++; key = ''; $('mode').textContent = 'DISCONNECTED'; $('count').textContent = 'Waiting for status.'; $('scope').textContent = ''; $('metrics').textContent = ''; $('fingerprint').textContent = ''; $('message').textContent = 'Dashboard disconnected. Server policy is unchanged.'; });
+$('disconnect').addEventListener('click', () => { generation++; key = ''; $('mode').textContent = 'DISCONNECTED'; $('count').textContent = 'Waiting for status.'; $('scope').textContent = ''; $('metrics').textContent = ''; $('fingerprint').textContent = ''; $('nativeTitle').textContent = 'Pair a television app.'; $('nativeStatus').textContent = ''; $('message').textContent = 'Dashboard disconnected. Server policy is unchanged.'; });
 setInterval(() => { refresh().catch(e => { $('message').textContent = e.message; }); }, 3000);

@@ -6,7 +6,7 @@ No real streaming account or physical device has been tested in this release.
 |---|---|---|---|
 | Controlled local HTTPS origin | Explicit proxy + test CA | Can we filter and preserve other content? | Integration tested |
 | Clear, owned VOD manifest | Explicit proxy + custom markers | Can a selected ad segment be removed? | Byte-level transformation tested |
-| YouTube TV app | Pairing/playback control protocol | Which devices expose ad state, mute and Skip? | Research; examine iSponsorBlockTV |
+| YouTube app on a TV/streamer | Pairing/playback control protocol | Which devices expose correct ad state, volume and Skip? | Optional experimental bridge; actual library + simulated server tested; physical device unvalidated |
 | YouTube Android app | Proxy or device control | Does this app version accept routing and CA trust? | Unknown |
 | Netflix / Hulu native apps | Proxy, then permitted control/output probes | Trust/pinning, DRM and ad-state visibility? | Unknown; no adapters |
 | Instagram app | Proxy or permitted UI signals | Separate ad response vs content, trust, app behavior? | Unknown; no adapters |

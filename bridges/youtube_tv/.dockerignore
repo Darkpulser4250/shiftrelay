@@ -1,0 +1,6 @@
+*
+!requirements.txt
+!ytbridge/
+!ytbridge/**
+!LICENSE
+!NOTICE.md

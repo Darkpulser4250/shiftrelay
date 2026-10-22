@@ -11,3 +11,6 @@ node_modules/
 *.p12
 *.zip
 *.log
+bridges/**/state/
+auth.json
+restore.json

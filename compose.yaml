@@ -55,7 +55,30 @@ services:
     logging:
       driver: json-file
       options: {max-size: "2m", max-file: "2"}
+  youtube-tv:
+    profiles: [youtube-tv]
+    build: ./bridges/youtube_tv
+    image: shiftrelay-youtube-tv:local
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 20s
+    environment:
+      SHIFTRELAY_TV_MODE: ${SHIFTRELAY_TV_MODE:-observe}
+      SHIFTRELAY_TV_ALLOW_SKIP: ${SHIFTRELAY_TV_ALLOW_SKIP:-false}
+    volumes:
+      - youtube_tv_state:/state
+      - status:/status
+    read_only: true
+    tmpfs: ["/tmp:size=16m,noexec,nosuid"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 96
+    mem_limit: 128m
+    logging:
+      driver: json-file
+      options: {max-size: "2m", max-file: "2"}
 volumes:
   ca:
   public:
   status:
+  youtube_tv_state:

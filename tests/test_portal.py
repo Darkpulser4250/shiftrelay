@@ -32,6 +32,12 @@ class PortalTests(unittest.TestCase):
         self.assertEqual(self.request('GET', '/v1/status')[0], 401)
         self.assertEqual(self.request('GET', '/v1/status', headers={'Authorization': 'Bearer ' + 'a'*40})[0], 200)
 
+    def test_native_status_is_authenticated_and_optional(self):
+        self.assertEqual(self.request('GET', '/v1/native-status')[0], 401)
+        result = self.request('GET', '/v1/native-status', headers={'Authorization': 'Bearer ' + 'a'*40})
+        self.assertEqual(result[0], 200)
+        self.assertEqual(json.loads(result[2]), {'youtube_tv': None})
+
     def test_enrollment_requires_consent_and_csrf(self):
         self.assertEqual(self.request('GET', '/enroll/ca.crt')[0], 403)
         status, headers, page = self.request('GET', '/enroll')

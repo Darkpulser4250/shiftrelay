@@ -4,14 +4,16 @@
 
 **Primary goal:** prevent ads from being delivered or shown in the official **YouTube, Netflix, Hulu, Facebook and Instagram apps**, using our own Docker-hosted server. Aim for complete ad removal wherever technically achievable, with normal content and app functions preserved. Website-only filtering and muting alone do not satisfy that full goal. See the [product goals and acceptance criteria](docs/product-goals.md).
 
-**Status: experimental v0.1.** This release proves selective HTTPS interception and filtering against a controlled local HTTPS origin. It does **not** yet block ads in YouTube, Netflix, Hulu, Facebook, Instagram, or arbitrary native TV/phone apps. No browser extension is required or included. Pi-hole and AdGuard are optional independent neighbors, not dependencies.
+**Status: experimental v0.2.** This release proves selective HTTPS filtering against a controlled origin and adds an optional YouTube-on-TV pairing/control adapter, tested with the real protocol library against a local simulated server. Physical-device compatibility is unvalidated. It does **not** yet provide complete ad blocking in YouTube, Netflix, Hulu, Facebook, Instagram, or arbitrary native TV/phone apps. No browser extension is required or included. Pi-hole and AdGuard are optional independent neighbors, not dependencies.
+
+**First native-app experiment:** [YouTube-on-TV bridge setup and recovery](bridges/youtube_tv/README.md). This pairs with the TV app through its control service; it does not require a certificate or route the video through the proxy. It is partial suppression—volume reduction and optional native Skip requests—not full ad removal.
 
 ## Why this project exists
 
 Network routing, visibility, ad recognition, and playback control are separate engineering problems. ShiftRelay investigates them separately, then aims to combine the approaches that work on each device:
 
 1. **Selective HTTPS proxy:** inspect only explicitly configured hosts, and apply rules to compatible clients that accept your per-install CA.
-2. **Native device control:** investigate playback protocols to mute ads or press a native Skip control without changing the encrypted stream. Some protocols communicate through the service rather than staying on the LAN.
+2. **Native device control:** an optional YouTube-on-TV bridge implements pairing, observe mode, bounded volume reduction, native Skip requests and crash-recovery records. Some protocols communicate through the service rather than staying on the LAN. A physical-device test is still required.
 3. **Perceptual sidecar:** recognize repeated ad audio/visual patterns after playback, then drive a supported device control. A file-based audio fingerprint experiment is included; live capture, muting hardware and remote-control adapters are not implemented.
 
 This combination is a research direction, not a claim of a novel algorithm or universal compatibility.
@@ -28,7 +30,8 @@ This combination is a research direction, not a claim of a novel algorithm or un
 | Status | Aggregate proxy counters and explicit scope | No device discovery, raw traffic recording or cloud telemetry |
 | Rule updates | Pinned Ed25519 verification, expiry, monotonic versions, schema + canary checks | Data-only; no scope expansion or code execution |
 | Audio experiment | Local WAV fingerprint comparison with unknown/candidate output | Synthetic offset/gain/noise test, no real-world accuracy claim |
-| Native app/TV control | Architecture and test plan | Not implemented |
+| Native YouTube-on-TV control | Pairing, observe mode, optional volume-zero and enabled Skip requests, bounded recovery | Real library + simulated Lounge server; physical TV unvalidated |
+| Other native apps | Research and capability plan | Netflix/Hulu/Facebook/Instagram/YouTube phone adapters not implemented |
 | Autonomous AI repair | Proposed maintenance workflow | Not implemented; no autonomous code agent |
 
 ## Quick start
@@ -101,6 +104,15 @@ python3 -m venv .venv
 
 The integration suite generates disposable certificates, starts a real local HTTPS origin and a real mitmdump process, and verifies filtering, preservation, CA rejection, proxy authentication and TLS passthrough. It makes no requests to streaming services. Docker and ARM64 execution need separate hardware/CI validation; passing Python tests does not certify those deployments.
 
+The independent native bridge has its own dependencies and tests:
+
+```bash
+.venv/bin/pip install -r bridges/youtube_tv/requirements.txt
+PYTHONPATH=bridges/youtube_tv .venv/bin/python -m unittest discover -s bridges/youtube_tv/tests -v
+```
+
+Its tests use a local simulated Lounge service with the actual pyytlounge library to check pairing, authentication round-trips, event decoding and outgoing commands. They do not connect to YouTube or certify device compatibility.
+
 ### Audio fingerprint experiment
 
 Convert lawfully obtained/owned audio samples with FFmpeg to mono 8 kHz 16-bit PCM WAV, then:
@@ -129,10 +141,10 @@ There is no live release catalog or release signing key bundled. Set up and veri
 
 ## Research priorities
 
-The first native-app target should be a compatible **YouTube TV app control protocol**, informed by iSponsorBlockTV, because there is an existing proof that server-side native app ad muting/Skip control can work on some devices. Netflix/Hulu should start with trust/proxy/DRM capability probes, not assumed manifest access. Physical screen/audio observation is an alternate detection path but requires a control channel and has latency and false-positive costs.
+The first native adapter now targets the **YouTube application on a TV/streamer**, informed by iSponsorBlockTV. Next: validate pairing, ad-state accuracy, restoration and latency on an owned device, and investigate separately whether a tested restart/resume operation can shorten ad waits. The experimental bridge does not implement restart/resume. Netflix/Hulu should start with trust/proxy/DRM capability probes, not assumed manifest access. Physical screen/audio observation is an alternate detection path but requires a control channel and has latency and false-positive costs.
 
 See [research.md](docs/research.md), [architecture.md](docs/architecture.md), and [compatibility.md](docs/compatibility.md). Contributions should include a device/app version and measured failure modes, not claims that packet size or AI bypasses encryption.
 
 ## License
 
-MIT for original ShiftRelay code. Dependencies and external projects keep their respective licenses. No external project source has been copied into this repository.
+The proxy/portal core and root tests are MIT. The optional independent service under `bridges/youtube_tv/`, including its tests, is GPL-3.0-only and has its own license/notice because it uses pyytlounge. The core image does not import or install that library. Dependencies and external projects retain their licenses; no external implementation source is vendored. See [NOTICE.md](NOTICE.md).

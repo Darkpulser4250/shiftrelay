@@ -8,7 +8,9 @@ The product target is complete native-app ad blocking where achievable, includin
 
 First target: a compatible YouTube TV app. iSponsorBlockTV demonstrates server-side pairing, ad muting, native Skip interaction, and SponsorBlock integration on supported devices. Study its pairing/playback protocol and test on one owned device. Reuse compatible libraries under their licenses or build an independently documented adapter. Do not infer Netflix/Hulu support from YouTube support.
 
-Acceptance: 30 manually labeled ad breaks on the chosen app version, log state transitions locally, verify initial mute state restoration and disconnect recovery. Report skips only after the real Skip operation is available. Record network latency, false positives and failures. No adapter has been implemented in this scaffold.
+Acceptance: 30 manually labeled ad breaks on the chosen app version, log state transitions locally, verify initial mute state restoration and disconnect recovery. Report skips only after the real Skip operation is available. Record network latency, false positives and failures. Version 0.2 implements an optional bridge with local protocol tests, but this physical-device acceptance gate has not yet been met. See [bridge setup](../bridges/youtube_tv/README.md).
+
+Prior-art experiment to investigate separately: [iSponsorBlockTV issue 489](https://github.com/dmunozv04/iSponsorBlockTV/issues/489) describes an experimental close-and-resume sequence after five seconds. Reports include restore timing and position glitches. ShiftRelay does not implement it or claim its results. Before adding it, test interruption detection, distinguishing user navigation, avoiding restart loops, restoring the same video and content position, live-stream handling and failure recovery on the target device. It would still leave some ad exposure, rather than proving complete blocking.
 
 ## 2. Proxy capability probes
 
