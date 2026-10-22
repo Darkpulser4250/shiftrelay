@@ -17,6 +17,9 @@ jobs:
       - run: pip check
   image:
     needs: tests
+    env:
+      SHIFTRELAY_ADMIN_KEY: ci-only-admin-00000000000000000000000000000000
+      SHIFTRELAY_PROXY_AUTH: ci:ci-only-proxy-00000000000000000000000000000000
     strategy:
       matrix:
         include:
@@ -28,9 +31,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker compose config --quiet
-        env:
-          SHIFTRELAY_ADMIN_KEY: ci-only-admin-not-for-deployment
-          SHIFTRELAY_PROXY_AUTH: ci:ci-only-proxy-not-for-deployment
-      - run: docker build -t shiftrelay:ci .
+      - run: docker build -t shiftrelay:local .
       - name: Container imports
-        run: docker run --rm --read-only --entrypoint python shiftrelay:ci -c 'import shiftrelay.launch, shiftrelay.portal; print("imports ok")'
+        run: docker run --rm --read-only --entrypoint python shiftrelay:local -c 'import shiftrelay.launch, shiftrelay.portal; print("imports ok")'
+      - name: Start actual Compose services
+        run: docker compose up -d --no-build --wait --wait-timeout 90
+      - name: Check enrolled public CA and authenticated proxy forwarding
+        run: |
+          docker compose exec -T portal python -c 'from pathlib import Path; c=Path("/public/shiftrelay-ca.crt").read_text(); assert "BEGIN CERTIFICATE" in c and "PRIVATE KEY" not in c; assert not Path("/ca/mitmproxy-ca.pem").exists()'
+          docker compose exec -T proxy python - <<'PY'
+          import base64, http.client, json, os
+          auth = base64.b64encode(os.environ['SHIFTRELAY_PROXY_AUTH'].encode()).decode()
+          connection = http.client.HTTPConnection('127.0.0.1', 8080, timeout=5)
+          connection.request('GET', 'http://portal:8787/healthz', headers={'Proxy-Authorization': 'Basic ' + auth})
+          response = connection.getresponse()
+          assert response.status == 200
+          assert json.loads(response.read())['status'] == 'ok'
+          connection.close()
+          print('Compose proxy forwarding and public certificate isolation passed')
+          PY
+      - name: Show service logs if startup failed
+        if: failure()
+        run: docker compose logs --no-color
+      - name: Clean up disposable CI services
+        if: always()
+        run: docker compose down -v
