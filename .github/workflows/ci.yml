@@ -17,6 +17,23 @@ jobs:
       - run: python -m unittest discover -s tests -v
       - run: PYTHONPATH=bridges/youtube_tv python -m unittest discover -s bridges/youtube_tv/tests -v
       - run: pip check
+  android-probe:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: {distribution: temurin, java-version: '17'}
+      - name: Ensure pinned Android SDK components
+        run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Build and verify native probe APK
+        run: python3 scripts/build_android_probe.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shiftrelay-android-probe
+          path: |
+            artifacts/shiftrelay-probe.apk
+            artifacts/shiftrelay-probe.apk.sha256
+          retention-days: 30
   image:
     needs: tests
     env:
@@ -68,9 +85,19 @@ jobs:
           connection.close()
           print('Compose proxy forwarding and public certificate isolation passed')
           PY
+      - name: Start the independent Android test server
+        run: docker compose -f compose.android.yaml up -d --no-build --wait --wait-timeout 90
+      - name: Install reference kernel WireGuard client
+        run: sudo apt-get update -qq && sudo apt-get install -y wireguard-tools
+      - name: Test actual WireGuard packets, DNS and HTTPS blocking
+        run: python3 scripts/test_android_wireguard.py
       - name: Show service logs if startup failed
         if: failure()
-        run: docker compose --profile youtube-tv logs --no-color
+        run: |
+          docker compose --profile youtube-tv logs --no-color
+          docker compose -f compose.android.yaml logs --no-color
       - name: Clean up disposable CI services
         if: always()
-        run: docker compose --profile youtube-tv down -v
+        run: |
+          docker compose --profile youtube-tv down -v
+          docker compose -f compose.android.yaml down -v

@@ -4,7 +4,9 @@
 
 **Primary goal:** prevent ads from being delivered or shown in the official **YouTube, Netflix, Hulu, Facebook and Instagram apps**, using our own Docker-hosted server. Aim for complete ad removal wherever technically achievable, with normal content and app functions preserved. Website-only filtering and muting alone do not satisfy that full goal. See the [product goals and acceptance criteria](docs/product-goals.md).
 
-**Status: experimental v0.2.** This release proves selective HTTPS filtering against a controlled origin and adds an optional YouTube-on-TV pairing/control adapter, tested with the real protocol library against a local simulated server. Physical-device compatibility is unvalidated. It does **not** yet provide complete ad blocking in YouTube, Netflix, Hulu, Facebook, Instagram, or arbitrary native TV/phone apps. No browser extension is required or included. Pi-hole and AdGuard are optional independent neighbors, not dependencies.
+**Status: experimental v0.3.** A [Galaxy S26 Ultra native Android test server](docs/android-s26.md) adds per-app WireGuard routing, an owned HTTPS blocking fixture and a native probe APK. The optional YouTube-on-TV bridge remains available. Physical-device compatibility is unvalidated. This release does **not** yet provide complete ad blocking in YouTube, Netflix, Hulu, Facebook, Instagram, or arbitrary native TV/phone apps. No browser extension is required or included. Pi-hole and AdGuard are optional independent neighbors, not dependencies.
+
+**Samsung phone setup:** follow [the Android server + APK guide](docs/android-s26.md). Use `compose.android.yaml` for that independent stack; the regular quick start below launches the explicit proxy. The Android default filters only our reserved test domains, so passing its test is not evidence of platform ad removal.
 
 **First native-app experiment:** [YouTube-on-TV bridge setup and recovery](bridges/youtube_tv/README.md). This pairs with the TV app through its control service; it does not require a certificate or route the video through the proxy. It is partial suppression—volume reduction and optional native Skip requests—not full ad removal.
 
@@ -31,7 +33,8 @@ This combination is a research direction, not a claim of a novel algorithm or un
 | Rule updates | Pinned Ed25519 verification, expiry, monotonic versions, schema + canary checks | Data-only; no scope expansion or code execution |
 | Audio experiment | Local WAV fingerprint comparison with unknown/candidate output | Synthetic offset/gain/noise test, no real-world accuracy claim |
 | Native YouTube-on-TV control | Pairing, observe mode, optional volume-zero and enabled Skip requests, bounded recovery | Real library + simulated Lounge server; physical TV unvalidated |
-| Other native apps | Research and capability plan | Netflix/Hulu/Facebook/Instagram/YouTube phone adapters not implemented |
+| Android ingress + probe | Per-app WireGuard, owned HTTPS origin, native APK, optional private hostname discovery | Automated tests; physical S26 Ultra unvalidated |
+| Official phone platform adapters | Research and capability testing | Netflix/Hulu/Facebook/Instagram/YouTube phone ad-removal adapters not implemented |
 | Autonomous AI repair | Proposed maintenance workflow | Not implemented; no autonomous code agent |
 
 ## Quick start
@@ -92,7 +95,7 @@ Remove the CA from your device's trust store when you no longer use inspection. 
 
 See [deployment.md](docs/deployment.md). A Tailscale exit node changes the route and outer VPN encryption. It does not terminate the app's inner TLS connection, configure ShiftRelay, or decrypt DRM media.
 
-The shipped runtime is an **explicit proxy**, not a transparent gateway. Transparent routing, captive portal triggers, DHCP/PAC deployment, per-device enrollment enforcement and native apps that ignore explicit proxies require additional engineering. Joining Wi-Fi is not consent to install a root CA.
+The regular stack is an **explicit proxy**. The separate [Android stack](docs/android-s26.md) uses WireGuard for selected native apps. A router-wide transparent gateway, captive portal triggers, DHCP/PAC deployment and per-device enrollment enforcement are not implemented. Joining Wi-Fi is not consent to install a root CA.
 
 ## Run the proof
 

@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "version": 1,
+  "mode": "filter",
+  "inspect_hosts": ["relay-test.invalid", "system-test.invalid"],
+  "bypass_hosts": [],
+  "block_rules": [{"id": "owned-android-ad", "host": "relay-test.invalid", "path": "/ad"}],
+  "owned_hls_hosts": []
+}

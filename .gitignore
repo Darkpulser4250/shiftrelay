@@ -14,3 +14,7 @@ node_modules/
 bridges/**/state/
 auth.json
 restore.json
+private/
+s26.conf
+*.apk
+*.keystore
