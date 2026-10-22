@@ -9,3 +9,5 @@ Scope: no automatic root trust installation, no stealth enrollment, no default-r
 The explicit proxy can reach hosts that the server can reach. It is not an SSRF sandbox or an internet-facing shared proxy. Keep it restricted to your own trusted clients. Its auth key is currently shared per installation; per-device revocation is future work.
 
 Default empty scope tunnels HTTPS, but passing a connection through still reveals destination/connection metadata to the relay. Lack of content inspection is not lack of all metadata.
+
+The optional native bridge stores TV pairing tokens and volume-recovery records in a private volume, never in its dashboard status. Pair only from your interactive terminal. It communicates through YouTube's Lounge service; this is not a wholly offline/LAN-only protocol. Assist is opt-in and may change TV volume or request native Skip; restoration is best effort if connectivity or power is lost. Keep the physical remote available. Do not publish pairing/state files in issues.

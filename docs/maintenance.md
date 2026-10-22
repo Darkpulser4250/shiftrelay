@@ -2,6 +2,8 @@
 
 Implemented: Dependabot configuration, CI tests/builds, and a signed data-only rule updater. Not implemented: a hosted update catalog, scheduled production rollout, automatic live health rollback, release image publishing or an AI patching agent.
 
+Version 0.2 also tests/builds the optional native bridge on AMD64/ARM64, starts it unpaired in observe mode, verifies authenticated sanitized status and checks that its protocol dependency is not installed in the core image. Real device behavior is a separate validation gate. Dependency update checks include the bridge's own package pins and Dockerfile.
+
 The signed catalog envelope is JSON with `payload_b64` and `signature_b64`. Decode `payload_b64` to the **exact signed bytes**. The pinned public key must be PEM Ed25519. The payload has exactly these fields:
 
 ```json

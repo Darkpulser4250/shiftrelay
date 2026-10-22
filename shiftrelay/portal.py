@@ -13,6 +13,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs
 from shiftrelay import __version__
 from shiftrelay.policy import load
+from shiftrelay.native_status import read_native_status
 
 STATIC = Path(__file__).with_name('static')
 
@@ -116,6 +117,8 @@ def handler(app):
                     return self.reply(503, {'error': 'Certificate unavailable'})
             if not self.admin():
                 return self.reply(401, {'error': 'Unauthorized'})
+            if self.path == '/v1/native-status':
+                return self.reply(200, {'youtube_tv': read_native_status(app.metrics.parent)})
             if self.path == '/v1/status':
                 try:
                     policy = load(app.policy_path)

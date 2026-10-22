@@ -19,6 +19,8 @@ TLS is distinct from media encryption. A decrypted HTTP response can still conta
 
 The proxy container alone mounts the private CA volume. The portal only mounts a separate public certificate volume. Port 8787 provides public static pages/enrollment and an admin-authenticated status endpoint. There are no remote write endpoints for policy changes.
 
+The optional GPL-3.0-only YouTube-on-TV bridge is a separate process and container. It stores pairing credentials and a recovery journal in its own private volume. The MIT portal only reads a validated, data-only public status file and exposes it through authenticated `/v1/native-status`; it does not import the bridge or read its private state. This control-service path does not route or decrypt the video stream.
+
 The portal's consent session authorizes a temporary certificate download, not network access or automatic inspection. The device owner separately configures trust/proxy settings. It is not a captive portal and does not detect new Wi-Fi clients. Per-device proxy credentials and enforced admission are future work.
 
 Global scope uses exact hosts with anchored TLS matching. The request filter uses exact host + path, excluding query strings. Block rules return HTTP 204 only for GET/HEAD. That behavior is not sufficient for all ad endpoints and can break players that expect a structured response. No production platform rules are included.

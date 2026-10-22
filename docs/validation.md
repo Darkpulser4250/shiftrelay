@@ -15,3 +15,13 @@ After publication, [GitHub Actions run 39869467541](https://github.com/Darkpulse
 Not executed: Raspberry Pi hardware benchmarks, sustained/concurrent streaming performance, router integration, Tailscale networking, live streaming accounts, native TV/app pairing, microphone/camera capture or real ad accuracy tests. Successful ARM64 CI runtime checks do not establish Pi thermal/throughput behavior or streaming-service compatibility.
 
 Dashboard browser visual QA was attempted, but no browser executable was installed and the browser download failed in this environment. HTTP enrollment/API behavior is covered by automated tests; visual layout remains unverified.
+
+## Version 0.2 native bridge — local validation
+
+The updated core suite passes **28 tests**. The independent YouTube-on-TV bridge passes **26 tests**, for **54 total**. The bridge suite includes the actual pyytlounge 3.4.0 library connecting to a local aiohttp Lounge simulator: TV-code pairing, current auth serialization/loading, token refresh, connection/subscription framing, ad-state events and outgoing native volume/Skip commands. A full runtime session also completes against that local service. No test connects to the real YouTube service or a physical TV.
+
+Controller tests cover passive observe mode, already-muted/zero-volume preservation, unknown volume/state abstention, manual volume overrides, the silence budget, Skip opt-in and retry limits, bounded command timeouts, device-bound journal recovery, journal expiry and command-acceptance without a TV acknowledgement. Additional tests verify hidden-prompt preconditions, owner-only pairing files, offline unpaired startup and sanitized/stale native status.
+
+The optional bridge has a separate GPL-3.0-only image and private state volume. CI is extended to build both images on native AMD64/ARM64 runners and start the bridge unpaired in observe mode. Its startup test checks that it remains passive and that the MIT core image does not install its protocol library. Results for this new image/runtime configuration must be checked in the associated pull request before merging.
+
+Remaining validation: actual TV pairing and ad-state accuracy; physical volume/Skip behavior; disconnect/crash recovery on the device; sustained Pi resource use. An accepted command and passing simulator test do not prove that an ad was suppressed or removed on a real app.

@@ -6,7 +6,7 @@ ShiftRelay is an independently useful, open-source server hosted by its users in
 
 The server should handle selected platforms efficiently and preserve normal content and application functions. It should support local use and private remote access such as Tailscale, clear device enrollment, an accessible dashboard, bypass and recovery, and verified maintenance updates. Pi-hole/AdGuard integration is optional; DNS blocking is not the core product.
 
-The current release is foundational research code, not delivery of this full product. No production platform adapter is shipped.
+The current release is research code, not delivery of this full product. An optional experimental YouTube-on-TV control adapter is implemented; it provides partial suppression requests and still requires physical-device validation. No production platform adapter or complete native-app ad-removal solution is shipped.
 
 ## Keep success definitions precise
 
