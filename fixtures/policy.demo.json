@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "version": 1,
+  "mode": "filter",
+  "inspect_hosts": ["localhost"],
+  "bypass_hosts": [],
+  "block_rules": [{"id": "owned-ad-script", "host": "localhost", "path": "/ads.js"}],
+  "owned_hls_hosts": ["localhost"]
+}

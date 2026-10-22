@@ -1,0 +1,36 @@
+name: Test and build
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements.txt -r research.txt
+      - run: python -m unittest discover -s tests -v
+      - run: pip check
+  image:
+    needs: tests
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            platform: linux/amd64
+          - runner: ubuntu-24.04-arm
+            platform: linux/arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose config --quiet
+        env:
+          SHIFTRELAY_ADMIN_KEY: ci-only-admin-not-for-deployment
+          SHIFTRELAY_PROXY_AUTH: ci:ci-only-proxy-not-for-deployment
+      - run: docker build -t shiftrelay:ci .
+      - name: Container imports
+        run: docker run --rm --read-only --entrypoint python shiftrelay:ci -c 'import shiftrelay.launch, shiftrelay.portal; print("imports ok")'

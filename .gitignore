@@ -1,0 +1,13 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+data/
+artifacts/
+node_modules/
+*.pem
+*.key
+*.crt
+*.p12
+*.zip
+*.log

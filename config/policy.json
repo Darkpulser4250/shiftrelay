@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "version": 1,
+  "mode": "observe",
+  "inspect_hosts": [],
+  "bypass_hosts": [],
+  "block_rules": [],
+  "owned_hls_hosts": []
+}
