@@ -11,6 +11,7 @@ from urllib.parse import urlsplit
 from mitmproxy import dns, http
 from shiftrelay.policy import HOST, load as read_policy
 from shiftrelay.proxy import ShiftRelay
+from shiftrelay.flow_identity import policy_host
 
 LAB_HOSTS = ('relay-test.invalid', 'system-test.invalid')
 
@@ -89,7 +90,7 @@ class AndroidLab:
         # A TLS failure alone cannot distinguish pinning, CA rejection or network loss.
 
     def requestheaders(self, flow):
-        if flow.request.host.lower().rstrip('.') not in LAB_HOSTS or flow.response is not None:
+        if policy_host(flow) not in LAB_HOSTS or flow.response is not None:
             return
         self.counts['owned_requests'] += 1
         path = urlsplit(flow.request.path).path

@@ -28,7 +28,9 @@ Remaining validation: actual TV pairing and ad-state accuracy; physical volume/S
 
 ## Version 0.3 Android lab
 
-The core suite now passes **39 tests** locally (11 new Android tests). Coverage includes persistent owner-only WireGuard keys, per-app configuration, endpoint injection rejection, both IP-family routes, opt-in bounded private DNS discovery, public-status privacy, virtual-origin scoping, real mitmdump content preservation/request blocking, untrusted-CA rejection and startup-log key exclusion. A real WireGuard server starts locally; the HTTPS fixture assertions use a second explicit transport with the same CA. The bridge remains independently tested.
+The core suite now passes **41 tests** locally (13 new Android tests). Coverage includes persistent owner-only WireGuard keys, per-app configuration, endpoint injection rejection, both IP-family routes, opt-in bounded private DNS discovery, public-status privacy, virtual-origin scoping, real mitmdump content preservation/request blocking, untrusted-CA rejection and startup-log key exclusion. A real WireGuard server starts locally; the HTTPS fixture assertions use a second explicit transport with the same CA. The bridge's 26 tests also pass, for **67 total**.
+
+The first real WireGuard CI test found that transparent requests expose their destination IP as `request.host`. The policy identity now uses the matching Host/SNI pair for WireGuard HTTPS requests, without changing the upstream IP. Regression tests verify hostname matching and abstention on absent/mismatched SNI. The real-peer test must pass with this correction before merge.
 
 CI additionally builds/verifies the native Android APK with Android SDK 36/build-tools 36.0.0 and JDK 17. Native AMD64/ARM64 jobs start the independent Docker stack and use a real Linux kernel WireGuard peer in a disposable network namespace to test tunneled DNS, HTTPS content, blocking, CA rejection and aggregate diagnostics. These new CI results must be checked before merge. The test client needs host privileges; the deployed server container does not.
 

@@ -9,6 +9,8 @@ from mitmproxy import dns
 from mitmproxy.test import tflow
 from shiftrelay.android import client_config, endpoint, ensure_keys, read_keys
 from shiftrelay.android_proxy import AndroidLab
+from shiftrelay.flow_identity import policy_host
+from mitmproxy.proxy.mode_specs import ProxyMode
 
 
 class AndroidConfigTests(unittest.TestCase):
@@ -42,6 +44,31 @@ class AndroidConfigTests(unittest.TestCase):
 
 
 class AndroidLabTests(unittest.TestCase):
+    def test_wireguard_identity_uses_matching_sni_and_host_without_rerouting(self):
+        flow = tflow.tflow()
+        flow.client_conn.proxy_mode = ProxyMode.parse('wireguard')
+        flow.client_conn.sni = 'relay-test.invalid'
+        flow.request.host = '10.0.0.2'
+        flow.request.scheme = 'https'
+        flow.request.headers['Host'] = 'relay-test.invalid'
+        flow.request.path = '/content'
+        self.assertEqual(policy_host(flow), 'relay-test.invalid')
+        AndroidLab().requestheaders(flow)
+        self.assertEqual(flow.response.status_code, 200)
+        self.assertEqual(flow.request.host, '10.0.0.2')
+
+    def test_wireguard_mismatched_or_absent_sni_cannot_expand_https_scope(self):
+        flow = tflow.tflow()
+        flow.client_conn.proxy_mode = ProxyMode.parse('wireguard')
+        flow.request.host = '10.0.0.2'
+        flow.request.scheme = 'https'
+        flow.request.headers['Host'] = 'relay-test.invalid'
+        for sni in ('unrelated.example.org', None):
+            flow.client_conn.sni = sni
+            self.assertEqual(policy_host(flow), '')
+            AndroidLab().requestheaders(flow)
+            self.assertIsNone(flow.response)
+
     def test_virtual_origin_does_not_replace_external_hosts(self):
         lab = AndroidLab()
         flow = tflow.tflow()

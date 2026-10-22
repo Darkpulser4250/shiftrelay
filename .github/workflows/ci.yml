@@ -40,6 +40,7 @@ jobs:
       SHIFTRELAY_ADMIN_KEY: ci-only-admin-00000000000000000000000000000000
       SHIFTRELAY_PROXY_AUTH: ci:ci-only-proxy-00000000000000000000000000000000
     strategy:
+      fail-fast: false
       matrix:
         include:
           - runner: ubuntu-latest

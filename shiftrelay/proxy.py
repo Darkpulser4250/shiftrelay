@@ -7,6 +7,7 @@ import time
 from mitmproxy import ctx, http
 from shiftrelay import policy
 from shiftrelay.hls import rewrite
+from shiftrelay.flow_identity import policy_host
 
 
 class ShiftRelay:
@@ -62,7 +63,7 @@ class ShiftRelay:
         self.counts['requests'] += 1
         if self.current is None:
             return
-        result = policy.decide(self.current, flow.request.host, flow.request.path, flow.request.method)
+        result = policy.decide(self.current, policy_host(flow), flow.request.path, flow.request.method)
         if result['action'] in ('observe', 'block'):
             self.counts['candidates'] += 1
         if result['action'] == 'block':
@@ -76,7 +77,7 @@ class ShiftRelay:
         if flow.response is None or self.current is None:
             return
         typ = flow.response.headers.get('content-type', '').split(';')[0].strip().lower()
-        host = flow.request.host.lower().rstrip('.')
+        host = policy_host(flow)
         owned = host in self.current['owned_hls_hosts'] and host not in self.current['bypass_hosts']
         manifest = typ in ('application/vnd.apple.mpegurl', 'application/x-mpegurl')
         flow.metadata['shiftrelay_owned_manifest'] = owned and manifest and self.current['mode'] == 'filter'
