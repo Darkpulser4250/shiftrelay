@@ -93,7 +93,7 @@ class ControllerTests(unittest.IsolatedAsyncioTestCase):
     async def test_skip_retries_bounded_and_rate_limited(self):
         controller = self.build(skip=True); await self.ready(controller, 0)
         for _ in range(10):
-            await controller.ad(True, True); self.clock.now += 6
+            await controller.ad(True, True); await controller.ad(None); self.clock.now += 6
         self.assertEqual(self.device.calls, [('skip',)]*3)
 
     async def test_disconnect_restores_before_releasing_connection(self):
@@ -140,6 +140,11 @@ class ControllerTests(unittest.IsolatedAsyncioTestCase):
         await controller.ad(None)
         self.assertEqual(self.device.calls[-1], ('volume', 42))
         self.assertIsNone(controller.snapshot()['ad_active'])
+        await controller.volume_changed(42, False)
+        await controller.ad(True)
+        self.assertEqual(self.device.calls, [('volume', 0), ('volume', 42)])
+        await controller.ad(False); await controller.ad(True)
+        self.assertEqual(self.device.calls[-1], ('volume', 0))
 
     async def test_timeout_is_bounded_and_recoverable(self):
         controller = self.build(command_timeout=.01); await self.ready(controller)

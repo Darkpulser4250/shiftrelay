@@ -19,6 +19,7 @@ class Controller:
         self.lock = asyncio.Lock()
         self.connected = False
         self.ad_active = None
+        self.break_open = False
         self.skip_enabled = False
         self.volume = None
         self.muted = None
@@ -150,13 +151,20 @@ class Controller:
         if type(skip_enabled) is not bool:
             raise ValueError('Boolean skip state required')
         async with self.lock:
-            if active is True and self.ad_active is not True:
+            if active is True and not self.break_open:
+                self.break_open = True
                 self.counters['ad_breaks'] += 1
                 self.skip_attempts = 0; self.skip_at = float('-inf')
             self.ad_active, self.skip_enabled = active, skip_enabled if active else False
             if active is not True:
                 await self.restore()
-                self.manual_override = self.exhausted = False
+                if active is False:
+                    self.break_open = False
+                    self.manual_override = self.exhausted = False
+                else:
+                    # Unknown signals must not reset the volume budget or create
+                    # a fresh Skip retry budget on the same uncertain break.
+                    self.exhausted = True
             await self.reconcile()
 
     async def volume_changed(self, volume, muted):
