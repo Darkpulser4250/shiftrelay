@@ -99,7 +99,7 @@ Discovery stores at most 128 DNS question hostnames/counts, owner-only, in the p
 
 For one candidate, add its exact host to `config/android.policy.json`'s `inspect_hosts`, set `mode` to `observe`, leave production block rules empty, and restart `android`. Test one action. TLS failures may mean CA rejection, pinning, protocol handling or network loss; a counter alone cannot distinguish these. Remove the host/restart or turn off the tunnel if playback breaks. Never infer an ad from packet size or block a shared media CDN wholesale.
 
-Only after inspection works and an ad request is distinguished from content should a narrowly scoped platform rule/adapter be tested. DRM remains a separate barrier. No root/pinning bypass, app patch, account credential capture or DRM decryption is included.
+After inspection works, the opt-in [platform response filters](platform-filters.md) can test recognized YouTube JSON, Instagram timeline or Facebook GraphQL responses. These are not verified official Android app blockers. Unsupported binary formats and Netflix/Hulu remain unchanged. DRM remains a separate barrier. No root/pinning bypass, app patch, account credential capture or DRM decryption is included.
 
 ## Acceptance record
 

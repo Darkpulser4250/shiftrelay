@@ -66,15 +66,17 @@ def ensure_keys(path):
     return read_keys(path)
 
 
-def client_config(keys, remote, apps):
+def client_config(keys, remote, apps, include_probe=True):
     import mitmproxy_rs
     remote = endpoint(remote)
-    selected = [PROBE_PACKAGE]
+    selected = [PROBE_PACKAGE] if include_probe else []
     for app in apps:
         if app not in PACKAGES:
             raise ValueError('Choose a supported app alias')
         if PACKAGES[app] not in selected:
             selected.append(PACKAGES[app])
+    if not selected:
+        raise ValueError('Select an app; an empty allowlist would route all apps')
     # Capture IPv6 as well: never silently send selected-app IPv6 outside the VPN.
     # Upstream IPv6 forwarding remains limited; this lab primarily tests IPv4.
     return ('[Interface]\nPrivateKey = ' + keys['client_key'] +
@@ -135,6 +137,7 @@ def main():
     client = sub.add_parser('client', help='Export SECRET peer config to stdout; redirect to a private file')
     client.add_argument('--endpoint', required=True)
     client.add_argument('--app', choices=PACKAGES, action='append', default=[])
+    client.add_argument('--no-probe', action='store_true', help='Omit automatic probe inclusion; requires --app')
     args = parser.parse_args()
     try:
         if args.command == 'run':
@@ -156,7 +159,7 @@ def main():
             print(json.dumps(value, indent=2))
         else:
             keys = read_keys(Path(os.environ.get('SHIFTRELAY_CA', '/ca')) / 'wireguard.conf')
-            sys.stdout.write(client_config(keys, args.endpoint, args.app))
+            sys.stdout.write(client_config(keys, args.endpoint, args.app, include_probe=not args.no_probe))
     except (OSError, ValueError, KeyError, TypeError):
         # Never include a config file's contents or key in an exception/log.
         parser.exit(1, 'Android lab configuration unavailable or invalid. Check private state and endpoint.\n')

@@ -10,9 +10,20 @@ async function refresh() {
   if (current !== generation || !key) return;
   $('mode').textContent = data.policy.mode.toUpperCase();
   const m = data.metrics;
-  $('count').textContent = m ? m.blocked + ' requests blocked' : 'Proxy counters not ready.';
+  const adapterNames = data.policy.response_adapters || [];
+  const adapterCounts = m?.response_adapters || {};
+  const modified = Object.values(adapterCounts).reduce((sum, row) => sum + (row.modified_responses || 0), 0);
+  $('count').textContent = m ? m.blocked + ' requests blocked · ' + modified + ' responses filtered' : 'Proxy counters not ready.';
   $('metrics').textContent = m ? ['Requests: ' + m.requests, 'Rule candidates: ' + m.candidates, 'Owned HLS segments removed: ' + m.hls_segments_removed,
     'Errors: ' + m.errors, 'Snapshot age: ' + Math.max(0, Math.floor(Date.now()/1000) - m.updated_at) + 's (written on traffic)'].join('\n') : 'Send a test request through the proxy.';
+  $('metrics').textContent += '\n\nResponse adapters: ' + (adapterNames.join(', ') || '(none)') + '\n' + adapterNames.map(name => {
+    const row = adapterCounts[name];
+    return row ? name + ':\n  Eligible: ' + row.eligible + ' / candidates: ' + row.candidate_units +
+      '\n  Modified responses: ' + row.modified_responses + ' / removed units: ' + row.removed_units +
+      '\n  Binary unhandled: ' + row.binary_unhandled + ' / unknown schema: ' + row.unknown_schema +
+      '\n  Unsupported format/encoding: ' + row.unsupported_format + '/' + row.unsupported_encoding +
+      '\n  Size/buffer limit: ' + row.oversize + '/' + row.buffer_budget : name + ': counters pending';
+  }).join('\n');
   $('scope').textContent = ['Inspect: ' + (data.policy.inspect_hosts.join(', ') || '(none)'), 'Bypass: ' + (data.policy.bypass_hosts.join(', ') || '(all non-targets)'),
     'Block rules: ' + data.policy.block_rules.length, 'Owned HLS: ' + (data.policy.owned_hls_hosts.join(', ') || '(none)')].join('\n');
   $('fingerprint').textContent = 'PUBLIC CA / SHA-256\n' + data.ca_sha256;
