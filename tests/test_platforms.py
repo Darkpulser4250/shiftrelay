@@ -46,11 +46,12 @@ class PlatformTests(unittest.TestCase):
     def test_instagram_requires_ad_identity_and_independent_signal(self):
         source = instagram()
         source['feed_items'].extend([{'media_or_ad': {'ad_id': '999', 'id': 'keep-without-signal'}},
-                                     {'media_or_ad': {'ad_action': 'learn_more', 'id': 'keep-without-id'}}])
+                                     {'media_or_ad': {'ad_action': 'learn_more', 'id': 'keep-without-id'}},
+                                     {'media_or_ad': {'ad_id': '0', 'ad_action': 'learn_more', 'id': 'keep-zero-id'}}])
         result = platforms.transform('instagram_timeline', json.dumps(source).encode())
         edited = json.loads(result.body)
         self.assertEqual(result.units, 1)
-        self.assertEqual(len(edited['feed_items']), 4)
+        self.assertEqual(len(edited['feed_items']), 5)
         self.assertEqual(edited['feed_items'][0], source['feed_items'][0])
         self.assertEqual(edited['next_max_id'], 'keep-cursor')
         self.assertTrue(edited['more_available'])

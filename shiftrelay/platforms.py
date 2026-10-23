@@ -122,7 +122,7 @@ def _instagram(value):
         if isinstance(media, dict):
             identity = media.get('ad_id')
             valid_id = (type(identity) is int and identity > 0 or
-                        isinstance(identity, str) and re.fullmatch(r'[0-9]{1,64}', identity) is not None)
+                        isinstance(identity, str) and re.fullmatch(r'[1-9][0-9]{0,63}', identity) is not None)
             action = media.get('ad_action')
             metadata = media.get('ad_metadata')
             signal = (isinstance(action, str) and bool(action.strip()) or
