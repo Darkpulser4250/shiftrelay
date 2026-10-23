@@ -18,3 +18,4 @@ private/
 s26.conf
 *.apk
 *.keystore
+config/*.previous.json

@@ -9,7 +9,7 @@ HOST = re.compile(r"(?=.{1,253}\Z)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)*[a-
 
 def validate(value):
     required = {"schema", "version", "mode", "inspect_hosts", "bypass_hosts", "block_rules", "owned_hls_hosts"}
-    if not isinstance(value, dict) or set(value) != required:
+    if not isinstance(value, dict) or not required <= set(value) or set(value) - required - {'response_adapters'}:
         raise ValueError("Invalid policy keys")
     if type(value['schema']) is not int or value['schema'] != 1 or type(value['version']) is not int or value['version'] < 1:
         raise ValueError("Unsupported schema or version")
@@ -21,6 +21,10 @@ def validate(value):
             raise ValueError("Hosts must be exact lowercase names, without ports or wildcards")
     if not set(value['owned_hls_hosts']) <= set(value['inspect_hosts']):
         raise ValueError("Owned HLS hosts must be inspected")
+    adapters = value.get('response_adapters', [])
+    allowed = {'youtube_player', 'instagram_timeline', 'facebook_graphql'}
+    if not isinstance(adapters, list) or len(adapters) > 3 or any(not isinstance(x, str) or x not in allowed for x in adapters) or len(set(adapters)) != len(adapters):
+        raise ValueError('Unknown or duplicate response adapter')
     if not isinstance(value['block_rules'], list) or len(value['block_rules']) > 500:
         raise ValueError("Too many rules")
     for rule in value['block_rules']:

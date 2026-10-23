@@ -35,3 +35,12 @@ The first real WireGuard CI test found that transparent requests expose their de
 CI additionally builds/verifies the native Android APK with Android SDK 36/build-tools 36.0.0 and JDK 17. Native AMD64/ARM64 jobs start the independent Docker stack and use a real Linux kernel WireGuard peer in a disposable network namespace to test tunneled DNS, HTTPS content, blocking, CA rejection and aggregate diagnostics. These new CI results must be checked before merge. The test client needs host privileges; the deployed server container does not.
 
 Not established: execution of the APK on the S26 Ultra, trust behavior of any official streaming/social app, production ad removal, Pi hardware throughput/thermals, battery use, IPv6 compatibility, VPN handover or Tailscale coexistence. No streaming account or phone was accessed. See [phone test procedure](android-s26.md).
+
+
+## Version 0.4 platform response filters
+
+Local validation passes **57 core tests + 26 separate TV-bridge tests = 83 total**. Adds 16 unit/regression and real HTTPS integration tests for YouTube player JSON, Instagram timeline records and Facebook GraphQL JSON-lines. Fixtures are synthetic and owned, informed by public field/schema observations; no platform requests, accounts or devices are used. The TLS harness redirects all upstream connections to a local origin and keeps certificate verification enabled. It verifies preservation of media/license data, organic nodes and pagination, compressed-response editing, unsupported binary passthrough, original bytes in observe mode, counters and full passthrough of an oversized chunked response.
+
+Regression tests cover duplicate/deep/nonfinite JSON, unknown schemas, decompression bombs/truncation/concatenated streams, concurrent buffer limits, cleanup, bypass/scope matching, policy replacement during buffering, and explicit profile installation/backup. The stream callback yields no output events while buffering; returning an empty bytes event prematurely terminates HTTP/1 chunked responses and is specifically covered by the real 2 MiB-plus test.
+
+No claim of official Android compatibility or universal blocking follows from these tests. Binary Android YouTube, Netflix/Hulu, app trust, real visual ad removal, Pi memory/latency under streaming load and device-level acceptance remain unvalidated/unsupported as described in [platform-filters.md](platform-filters.md). CI results for the changed code must be checked before merge.

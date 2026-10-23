@@ -4,7 +4,7 @@
 
 **Primary goal:** prevent ads from being delivered or shown in the official **YouTube, Netflix, Hulu, Facebook and Instagram apps**, using our own Docker-hosted server. Aim for complete ad removal wherever technically achievable, with normal content and app functions preserved. Website-only filtering and muting alone do not satisfy that full goal. See the [product goals and acceptance criteria](docs/product-goals.md).
 
-**Status: experimental v0.3.** A [Galaxy S26 Ultra native Android test server](docs/android-s26.md) adds per-app WireGuard routing, an owned HTTPS blocking fixture and a native probe APK. The optional YouTube-on-TV bridge remains available. Physical-device compatibility is unvalidated. This release does **not** yet provide complete ad blocking in YouTube, Netflix, Hulu, Facebook, Instagram, or arbitrary native TV/phone apps. No browser extension is required or included. Pi-hole and AdGuard are optional independent neighbors, not dependencies.
+**Status: experimental v0.4.** Opt-in [server response filters](docs/platform-filters.md) now edit recognized YouTube player JSON, Instagram timeline JSON and Facebook GraphQL JSON/JSON-lines. These require decrypted compatible responses; official Android app compatibility is unvalidated. This is **not** a universal server-only official-app blocker. YouTube's unverified binary formats and Netflix/Hulu remain unsupported. The [Android WireGuard lab](docs/android-s26.md), probe APK and optional YouTube-on-TV bridge remain available. No browser extension, app patch or root is required by the server filters. Pi-hole and AdGuard are optional independent neighbors, not dependencies.
 
 **Samsung phone setup:** follow [the Android server + APK guide](docs/android-s26.md). Use `compose.android.yaml` for that independent stack; the regular quick start below launches the explicit proxy. The Android default filters only our reserved test domains, so passing its test is not evidence of platform ad removal.
 
@@ -34,7 +34,7 @@ This combination is a research direction, not a claim of a novel algorithm or un
 | Audio experiment | Local WAV fingerprint comparison with unknown/candidate output | Synthetic offset/gain/noise test, no real-world accuracy claim |
 | Native YouTube-on-TV control | Pairing, observe mode, optional volume-zero and enabled Skip requests, bounded recovery | Real library + simulated Lounge server; physical TV unvalidated |
 | Android ingress + probe | Per-app WireGuard, owned HTTPS origin, native APK, optional private hostname discovery | Automated tests; physical S26 Ultra unvalidated |
-| Official phone platform adapters | Research and capability testing | Netflix/Hulu/Facebook/Instagram/YouTube phone ad-removal adapters not implemented |
+| Platform response adapters | Opt-in YouTube player, Instagram timeline and Facebook GraphQL filters for known JSON schemas | Real local TLS fixtures; official phone apps unvalidated; no Netflix/Hulu or Android protobuf adapter |
 | Autonomous AI repair | Proposed maintenance workflow | Not implemented; no autonomous code agent |
 
 ## Quick start
