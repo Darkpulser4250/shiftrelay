@@ -144,7 +144,7 @@ There is no live release catalog or release signing key bundled. Set up and veri
 
 ## Research priorities
 
-The first native adapter now targets the **YouTube application on a TV/streamer**, informed by iSponsorBlockTV. Next: validate pairing, ad-state accuracy, restoration and latency on an owned device, and investigate separately whether a tested restart/resume operation can shorten ad waits. The experimental bridge does not implement restart/resume. Netflix/Hulu should start with trust/proxy/DRM capability probes, not assumed manifest access. Physical screen/audio observation is an alternate detection path but requires a control channel and has latency and false-positive costs.
+The current priority is **server-side filtering with unchanged official apps**: establish which actual phone responses can be inspected, verify their schemas, and measure ad removal while preserving normal playback. The shipped JSON adapters are a partial step, not verified native-app support. Netflix/Hulu still need trust/application-encryption/playback investigation. The optional YouTube TV bridge is separate partial suppression; its physical pairing, ad-state accuracy, volume recovery and latency remain unvalidated. It does not implement restart/resume.
 
 See [research.md](docs/research.md), [architecture.md](docs/architecture.md), and [compatibility.md](docs/compatibility.md). Contributions should include a device/app version and measured failure modes, not claims that packet size or AI bypasses encryption.
 
