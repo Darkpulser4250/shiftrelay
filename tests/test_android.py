@@ -39,6 +39,11 @@ class AndroidConfigTests(unittest.TestCase):
         self.assertIn('IncludedApplications = org.shiftrelay.probe, com.google.android.youtube\n', config)
         self.assertNotIn(keys['server_key'], config)
         self.assertNotIn('com.netflix.mediaclient', config)
+        config = client_config(keys, '192.168.1.10:51820', ['youtube'], include_probe=False)
+        self.assertIn('IncludedApplications = com.google.android.youtube\n', config)
+        self.assertNotIn('org.shiftrelay.probe', config)
+        with self.assertRaises(ValueError):
+            client_config(keys, '192.168.1.10:51820', [], include_probe=False)
         with self.assertRaises(ValueError):
             client_config(keys, 'host:51820', ['unknown'])
 

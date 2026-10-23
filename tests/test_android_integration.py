@@ -95,6 +95,11 @@ class AndroidIntegration(unittest.TestCase):
         output = subprocess.check_output([sys.executable, '-m', 'shiftrelay.android', 'client',
                                          '--endpoint', '127.0.0.1:51820', '--app', 'youtube'], env=self.env, cwd=ROOT, text=True)
         self.assertIn('IncludedApplications = org.shiftrelay.probe, com.google.android.youtube', output)
+        direct = subprocess.check_output([sys.executable, '-m', 'shiftrelay.android', 'client',
+                                         '--endpoint', '127.0.0.1:51820', '--app', 'youtube', '--no-probe'],
+                                        env=self.env, cwd=ROOT, text=True)
+        self.assertIn('IncludedApplications = com.google.android.youtube', direct)
+        self.assertNotIn('org.shiftrelay.probe', direct)
         keys = json.loads((self.folder / 'ca/wireguard.conf').read_text())
         self.log.flush(); self.log.seek(0); log = self.log.read()
         self.assertNotIn(keys['client_key'], log)

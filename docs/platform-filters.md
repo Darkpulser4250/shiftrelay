@@ -19,6 +19,16 @@ Only GET/POST and complete HTTP 200 responses are eligible. Host scope, enabled 
 
 Use the [Android server guide](android-s26.md) for the existing WireGuard/CA connection. On a phone, include the target app in the WireGuard configuration. The server cannot force routing from elsewhere on a LAN; the client/router must direct traffic to it. A server in another network still requires an accessible route, and an indirect path can add latency.
 
+**The ShiftRelay Probe APK is optional for these filters.** To route selected apps without installing our probe, export a config with `--no-probe` (the official WireGuard client and one-time CA enrollment are still needed for this transport):
+
+```bash
+umask 077
+docker compose -f compose.android.yaml exec -T android python -m shiftrelay.android client \
+  --endpoint YOUR_SERVER_LAN_IP:51820 --app youtube --no-probe > private/s26.conf
+```
+
+Create the owner-only `private/` directory as described in the phone guide. Replace the endpoint with your actual server address. `--no-probe` requires at least one selected app, so an empty inclusion list cannot accidentally route every app. Existing configurations continue including the probe by default.
+
 Start with one selected platform in observation mode:
 
 ```bash
