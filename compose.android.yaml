@@ -1,0 +1,67 @@
+# Independent, single-phone test server. No privileged container or /dev/net/tun.
+name: shiftrelay-android
+services:
+  android:
+    build: .
+    image: shiftrelay:local
+    command: ["python", "-m", "shiftrelay.android", "run"]
+    restart: unless-stopped
+    init: true
+    ports: ["${SHIFTRELAY_ANDROID_BIND:-127.0.0.1}:51820:51820/udp"]
+    environment:
+      SHIFTRELAY_POLICY: /config/android.policy.json
+      SHIFTRELAY_ANDROID_DISCOVERY: ${SHIFTRELAY_ANDROID_DISCOVERY:-false}
+    volumes:
+      - android_ca:/ca
+      - android_public:/public
+      - android_status:/status
+      - ./config:/config:ro
+    read_only: true
+    tmpfs: ["/tmp:size=32m,noexec,nosuid"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "python", "-m", "shiftrelay.android", "doctor"]
+      interval: 20s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+    logging:
+      driver: json-file
+      options: {max-size: "2m", max-file: "2"}
+  portal:
+    build: .
+    image: shiftrelay:local
+    command: ["python", "-m", "shiftrelay.portal"]
+    restart: unless-stopped
+    init: true
+    ports: ["${SHIFTRELAY_ANDROID_PORTAL_BIND:-127.0.0.1}:8788:8787"]
+    environment:
+      SHIFTRELAY_ADMIN_KEY: ${SHIFTRELAY_ADMIN_KEY:?Run scripts/setup.py}
+      SHIFTRELAY_POLICY: /config/android.policy.json
+    volumes:
+      - android_public:/public:ro
+      - android_status:/status:ro
+      - ./config:/config:ro
+    read_only: true
+    tmpfs: ["/tmp:size=16m,noexec,nosuid"]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 96
+    mem_limit: 128m
+    depends_on:
+      android: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8787/healthz',timeout=2).close()"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    logging:
+      driver: json-file
+      options: {max-size: "2m", max-file: "2"}
+volumes:
+  android_ca:
+  android_public:
+  android_status:

@@ -22,7 +22,7 @@ Transparent interception needs router/VLAN/gateway changes, IPv4 and IPv6 covera
 
 HTTP/3 uses QUIC over UDP and needs an appropriate supported interception mode. Blocking UDP/443 sometimes induces fallback, but can cause failures; it neither decrypts TLS nor guarantees a fallback. ECH and shared CDNs complicate host-based routing. DNS manipulation is not a substitute for a measured routing plan.
 
-mitmproxy offers transparent and WireGuard modes that may inform later routing work. A separate WireGuard VPN app can conflict with Tailscale on phones that permit only one active VPN. This release deliberately does not configure the router or install a second VPN.
+The independent [Android WireGuard lab](android-s26.md) is implemented in `compose.android.yaml`; it routes selected apps without Wi-Fi proxy settings. It does not configure the router or bypass app TLS/DRM. Use WireGuard or Tailscale on the phone for the initial experiment, not both simultaneously.
 
 ## Performance budget
 

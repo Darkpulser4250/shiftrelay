@@ -25,3 +25,13 @@ Controller tests cover passive observe mode, already-muted/zero-volume preservat
 The optional bridge has a separate GPL-3.0-only image and private state volume. CI is extended to build both images on native AMD64/ARM64 runners and start the bridge unpaired in observe mode. Its startup test checks that it remains passive and that the MIT core image does not install its protocol library. Results for this new image/runtime configuration must be checked in the associated pull request before merging.
 
 Remaining validation: actual TV pairing and ad-state accuracy; physical volume/Skip behavior; disconnect/crash recovery on the device; sustained Pi resource use. An accepted command and passing simulator test do not prove that an ad was suppressed or removed on a real app.
+
+## Version 0.3 Android lab
+
+The core suite now passes **41 tests** locally (13 new Android tests). Coverage includes persistent owner-only WireGuard keys, per-app configuration, endpoint injection rejection, both IP-family routes, opt-in bounded private DNS discovery, public-status privacy, virtual-origin scoping, real mitmdump content preservation/request blocking, untrusted-CA rejection and startup-log key exclusion. A real WireGuard server starts locally; the HTTPS fixture assertions use a second explicit transport with the same CA. The bridge's 26 tests also pass, for **67 total**.
+
+The first real WireGuard CI test found that transparent requests expose their destination IP as `request.host`. The policy identity now uses the matching Host/SNI pair for WireGuard HTTPS requests, without changing the upstream IP. Regression tests verify hostname matching and abstention on absent/mismatched SNI. The real-peer test must pass with this correction before merge.
+
+CI additionally builds/verifies the native Android APK with Android SDK 36/build-tools 36.0.0 and JDK 17. Native AMD64/ARM64 jobs start the independent Docker stack and use a real Linux kernel WireGuard peer in a disposable network namespace to test tunneled DNS, HTTPS content, blocking, CA rejection and aggregate diagnostics. These new CI results must be checked before merge. The test client needs host privileges; the deployed server container does not.
+
+Not established: execution of the APK on the S26 Ultra, trust behavior of any official streaming/social app, production ad removal, Pi hardware throughput/thermals, battery use, IPv6 compatibility, VPN handover or Tailscale coexistence. No streaming account or phone was accessed. See [phone test procedure](android-s26.md).

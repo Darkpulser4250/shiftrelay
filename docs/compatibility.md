@@ -2,12 +2,13 @@
 
 No real streaming account or physical device has been tested in this release.
 
-| Target | Proposed access | Main question | v0.1 status |
+| Target | Proposed access | Main question | Current status |
 |---|---|---|---|
 | Controlled local HTTPS origin | Explicit proxy + test CA | Can we filter and preserve other content? | Integration tested |
 | Clear, owned VOD manifest | Explicit proxy + custom markers | Can a selected ad segment be removed? | Byte-level transformation tested |
 | YouTube app on a TV/streamer | Pairing/playback control protocol | Which devices expose correct ad state, volume and Skip? | Optional experimental bridge; actual library + simulated server tested; physical device unvalidated |
-| YouTube Android app | Proxy or device control | Does this app version accept routing and CA trust? | Unknown |
+| Galaxy S26 Ultra / owned native probe | Per-app WireGuard + scoped user CA | Does the phone reach the server and preserve content while blocking the fixture? | Docker lab + APK implemented; physical phone unvalidated |
+| YouTube Android app | Per-app WireGuard, then selective inspection/control research | Does this app version accept routing and CA trust? | Route/probe tooling implemented; official-app ad removal unimplemented and unvalidated |
 | Netflix / Hulu native apps | Proxy, then permitted control/output probes | Trust/pinning, DRM and ad-state visibility? | Unknown; no adapters |
 | Instagram app | Proxy or permitted UI signals | Separate ad response vs content, trust, app behavior? | Unknown; no adapters |
 | Facebook app | Proxy or permitted UI signals | Sponsored feed/reel delivery boundaries; trust; organic-content preservation? | Unknown; no adapters |
