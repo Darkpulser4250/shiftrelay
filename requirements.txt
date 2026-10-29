@@ -1,1 +1,1 @@
-mitmproxy==12.3.0
+mitmproxy==12.3.1
