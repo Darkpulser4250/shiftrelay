@@ -1,2 +1,2 @@
-pyytlounge==3.4.0
+pyytlounge==3.5.0
 aiohttp==3.14.5
